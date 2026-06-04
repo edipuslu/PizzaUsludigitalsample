@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uslu Pizza — Fired With Passion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&family=Playfair+Display+SC:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            flame:   '#FF6B35',
+            ember:   '#C0392B',
+            coal:    '#1A0A00',
+            ash:     '#2D1810',
+            crust:   '#FFF8F3',
+            gold:    '#E8A020',
+          },
+          fontFamily: {
+            display: ['"Playfair Display SC"', 'serif'],
+            body:    ['Karla', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: auto; }
+    body { font-family: 'Karla', sans-serif; background: #FFF8F3; color: #1A0A00; overflow-x: hidden; }
+    * { cursor: url('pizza-images/cursor-sized.png') 64 36, auto !important; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #FFF8F3; }
+    ::-webkit-scrollbar-thumb { background: #FF6B35; border-radius: 3px; }
+
+    /* ── Nav ── */
+    #navbar {
+      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 32px); max-width: 1200px; z-index: 50;
+      background: rgba(26, 10, 0, 0.85);
+      backdrop-filter: blur(14px);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 107, 53, 0.25);
+      padding: 12px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: box-shadow 0.3s;
+    }
+    #navbar.scrolled { box-shadow: 0 8px 32px rgba(192, 57, 43, 0.35); }
+
+    /* ── Hero ── */
+    .hero-bg {
+      background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(255,107,53,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 60% 50% at 30% 70%, rgba(192,57,43,0.12) 0%, transparent 60%),
+                  #1A0A00;
+    }
+    .hero-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,107,53,0.15);
+      animation: pulse-ring 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* ── Scroll offset for fixed navbar ── */
+    #menu, #about, #gallery, #contact { scroll-margin-top: 80px; }
+
+    /* ── Cart toast ── */
+    #cart-toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1A0A00; color: #fff;
+      padding: 12px 24px; border-radius: 999px;
+      font-size: 14px; font-weight: 600;
+      border: 1px solid rgba(255,107,53,0.4);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      z-index: 999; white-space: nowrap;
+      transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.35s ease;
+      opacity: 0; pointer-events: none;
+    }
+    #cart-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    @keyframes pulse-ring {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50%       { opacity: 0.35; transform: scale(1.04); }
+    }
+
+    /* ── Pizza card ── */
+    .pizza-card {
+      background: #fff;
+      border: 1px solid rgba(255,107,53,0.12);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      cursor: pointer;
+    }
+    .pizza-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 48px rgba(192,57,43,0.18);
+      border-color: rgba(255,107,53,0.4);
+    }
+    .card-img-wrap { overflow: hidden; }
+    .card-img-wrap img {
+      width: 100%; display: block; object-fit: cover;
+      aspect-ratio: 4/3;
+      transition: transform 0.4s ease;
+    }
+    .pizza-card:hover .card-img-wrap img { transform: scale(1.07); }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── Flame divider ── */
+    .flame-divider {
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #FF6B35, #C0392B, #FF6B35, transparent);
+      border-radius: 999px;
+      opacity: 0.6;
+    }
+
+    /* ── Section fade-in ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── CTA button ── */
+    .btn-primary {
+      background: linear-gradient(135deg, #FF6B35, #C0392B);
+      color: #fff;
+      padding: 14px 36px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(192,57,43,0.4); }
+    .btn-primary:active { transform: translateY(0); opacity: 0.9; }
+
+    .btn-outline {
+      background: transparent;
+      color: #fff;
+      padding: 14px 36px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.65); }
+
+    /* ── Reduced motion ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, .reveal { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    /* ── Mobile nav ── */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: flex; }
+
+    /* ── Stat counter ── */
+    .stat-num { font-size: clamp(36px, 5vw, 56px); font-family: 'Playfair Display SC', serif; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     NAVBAR
+════════════════════════════════ -->
+<nav id="navbar" role="navigation" aria-label="Main navigation">
+  <!-- Logo -->
+  <a href="#" class="flex items-center gap-3" aria-label="Uslu Pizza home">
+    <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg,#FF6B35,#C0392B);">
+      <!-- Pizza slice SVG -->
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="rgba(255,255,255,0.15)"/>
+        <path d="M12 2 L22 12 Q17 17 12 22 Q2 17 2 12 Z" fill="white" opacity="0.9"/>
+        <circle cx="10" cy="10" r="1.5" fill="#C0392B"/>
+        <circle cx="14" cy="13" r="1.2" fill="#C0392B"/>
+        <circle cx="11" cy="15" r="1" fill="#C0392B"/>
+      </svg>
+    </div>
+    <span class="text-white font-display font-bold text-xl tracking-wide hidden sm:block">Uslu Pizza</span>
+  </a>
+
+  <!-- Desktop nav links -->
+  <ul class="hidden md:flex items-center gap-8 text-sm font-semibold tracking-wide list-none">
+    <li><a href="#menu"    class="text-white/70 hover:text-flame transition-colors duration-200 cursor-pointer">Menu</a></li>
+    <li><a href="#about"   class="text-white/70 hover:text-flame transition-colors duration-200 cursor-pointer">About</a></li>
+    <li><a href="#gallery" class="text-white/70 hover:text-flame transition-colors duration-200 cursor-pointer">Gallery</a></li>
+    <li><a href="#contact" class="text-white/70 hover:text-flame transition-colors duration-200 cursor-pointer">Contact</a></li>
+  </ul>
+
+  <!-- Order CTA -->
+  <a href="#menu" class="btn-primary text-sm py-2.5 px-5 hidden md:inline-flex" aria-label="Order now">
+    Order Now
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+
+  <!-- Hamburger (mobile) -->
+  <button id="hamburger" class="md:hidden p-2 rounded-lg text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-flame" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle menu">
+    <svg id="ham-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <line x1="3" y1="6"  x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+    <svg id="close-icon" class="hidden" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</nav>
+
+<!-- Mobile menu -->
+<div id="mobile-menu" class="fixed inset-x-4 top-20 z-40 flex-col gap-2 rounded-2xl p-4" style="background:rgba(26,10,0,0.96); backdrop-filter:blur(20px); border:1px solid rgba(255,107,53,0.2);" role="menu">
+  <a href="#menu"    class="block text-white/80 hover:text-flame px-4 py-3 rounded-xl hover:bg-white/5 transition-colors duration-200 font-semibold cursor-pointer" role="menuitem">Menu</a>
+  <a href="#about"   class="block text-white/80 hover:text-flame px-4 py-3 rounded-xl hover:bg-white/5 transition-colors duration-200 font-semibold cursor-pointer" role="menuitem">About</a>
+  <a href="#gallery" class="block text-white/80 hover:text-flame px-4 py-3 rounded-xl hover:bg-white/5 transition-colors duration-200 font-semibold cursor-pointer" role="menuitem">Gallery</a>
+  <a href="#contact" class="block text-white/80 hover:text-flame px-4 py-3 rounded-xl hover:bg-white/5 transition-colors duration-200 font-semibold cursor-pointer" role="menuitem">Contact</a>
+  <a href="#menu" class="btn-primary mt-2 justify-center" role="menuitem">Order Now</a>
+</div>
+
+
+<!-- ════════════════════════════════
+     HERO
+════════════════════════════════ -->
+<section class="hero-bg relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 overflow-hidden" aria-label="Hero">
+
+  <!-- Decorative rings -->
+  <div class="hero-ring" style="width:600px;height:600px;top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="hero-ring" style="width:800px;height:800px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:1.5s;"></div>
+  <div class="hero-ring" style="width:1000px;height:1000px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:3s;"></div>
+
+  <!-- Floating orbs -->
+  <div class="absolute rounded-full pointer-events-none" style="width:320px;height:320px;background:radial-gradient(circle,rgba(255,107,53,0.22),transparent 70%);top:15%;right:8%;animation:pulse-ring 6s ease-in-out infinite;"></div>
+  <div class="absolute rounded-full pointer-events-none" style="width:220px;height:220px;background:radial-gradient(circle,rgba(192,57,43,0.2),transparent 70%);bottom:20%;left:6%;animation:pulse-ring 5s ease-in-out infinite 2s;"></div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-4xl">
+    <div class="badge mb-6 text-flame" style="background:rgba(255,107,53,0.15); border:1px solid rgba(255,107,53,0.3);">
+      Est. 2012 · Wood-Fired Perfection
+    </div>
+
+    <h1 class="font-display text-white leading-[1.1] mb-6" style="font-size:clamp(48px,9vw,108px);">
+      Fired With<br/>
+      <span style="background:linear-gradient(90deg,#FF6B35,#E8A020,#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+        Passion
+      </span>
+    </h1>
+
+    <p class="text-white/65 mb-10 mx-auto font-body" style="font-size:clamp(16px,2vw,20px);max-width:540px;line-height:1.7;">
+      Hand-stretched dough, San Marzano tomatoes, and premium toppings
+      — baked in our 900°F stone oven until gloriously perfect.
+    </p>
+
+    <div class="flex flex-wrap items-center justify-center gap-4">
+      <a href="#menu" class="btn-primary" style="font-size:16px;padding:16px 40px;">
+        Explore Menu
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#about" class="btn-outline" style="font-size:16px;padding:16px 40px;">Our Story</a>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="mt-16 flex flex-wrap justify-center gap-10 sm:gap-16">
+      <div>
+        <div class="stat-num text-flame font-bold">12+</div>
+        <div class="text-white/50 text-sm font-semibold uppercase tracking-widest mt-1">Years Serving</div>
+      </div>
+      <div style="border-left:1px solid rgba(255,107,53,0.2);"></div>
+      <div>
+        <div class="stat-num text-flame font-bold">24</div>
+        <div class="text-white/50 text-sm font-semibold uppercase tracking-widest mt-1">Signature Pizzas</div>
+      </div>
+      <div style="border-left:1px solid rgba(255,107,53,0.2);"></div>
+      <div>
+        <div class="stat-num text-flame font-bold">98%</div>
+        <div class="text-white/50 text-sm font-semibold uppercase tracking-widest mt-1">Happy Guests</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40" aria-hidden="true">
+    <span class="text-white text-xs tracking-widest uppercase font-semibold">Scroll</span>
+    <div class="w-px h-10 bg-white/40" style="animation:pulse-ring 2s ease-in-out infinite;"></div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     MENU
+════════════════════════════════ -->
+<section id="menu" class="py-24 px-6" style="background:#FFF8F3;" aria-label="Menu">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Heading -->
+    <div class="text-center mb-16 reveal">
+      <div class="badge mb-4 text-ember" style="background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.25);">Our Menu</div>
+      <h2 class="font-display text-coal leading-tight mb-4" style="font-size:clamp(36px,5vw,60px);">Signature Pies</h2>
+      <p class="text-ash/60 max-w-md mx-auto" style="font-size:17px;line-height:1.7;">Each pizza is crafted to order — never frozen, always fresh.</p>
+      <div class="flame-divider w-24 mx-auto mt-6"></div>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="flex flex-wrap justify-center gap-3 mb-12 reveal" role="tablist" aria-label="Menu categories">
+      <button class="menu-tab active badge text-sm py-2.5 px-5 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame" data-cat="all" role="tab" aria-selected="true" style="background:linear-gradient(135deg,#FF6B35,#C0392B);color:#fff;border:none;">All Pizzas</button>
+      <button class="menu-tab badge text-sm py-2.5 px-5 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame" data-cat="classic" role="tab" aria-selected="false" style="background:rgba(26,10,0,0.06);color:#2D1810;border:1px solid rgba(26,10,0,0.12);">Classic</button>
+      <button class="menu-tab badge text-sm py-2.5 px-5 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame" data-cat="premium" role="tab" aria-selected="false" style="background:rgba(26,10,0,0.06);color:#2D1810;border:1px solid rgba(26,10,0,0.12);">Premium</button>
+      <button class="menu-tab badge text-sm py-2.5 px-5 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame" data-cat="veg" role="tab" aria-selected="false" style="background:rgba(26,10,0,0.06);color:#2D1810;border:1px solid rgba(26,10,0,0.12);">Vegetarian</button>
+    </div>
+
+    <!-- Pizza grid -->
+    <div id="pizza-grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+
+      <!-- Card -->
+      <article class="pizza-card reveal" data-cat="classic" aria-label="Margherita pizza">
+        <div class="card-img-wrap">
+          <img src="pizza-images/delicious-pizza-with-basil-tomatoes-olives-and-p-2026-03-25-00-00-30-utc.jpg" alt="Margherita pizza with basil and tomatoes" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-display text-coal font-bold text-lg">Margherita</h3>
+            <span class="badge" style="background:rgba(232,160,32,0.15);color:#B87800;border:1px solid rgba(232,160,32,0.3);">Classic</span>
+          </div>
+          <p class="text-ash/60 text-sm leading-relaxed mb-4">San Marzano tomatoes, fresh mozzarella di bufala, hand-torn basil, extra-virgin olive oil.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-flame font-bold text-xl">$14.90</span>
+            <button class="btn-primary text-xs py-2 px-4" aria-label="Add Margherita to cart">Add +</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="pizza-card reveal" data-cat="classic" aria-label="Diavola pizza">
+        <div class="card-img-wrap">
+          <img src="pizza-images/delicious-pepperoni-pizza-on-a-dark-background-2026-03-16-06-16-41-utc.jpg" alt="Diavola spicy pepperoni pizza on dark background" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-display text-coal font-bold text-lg">Diavola</h3>
+            <span class="badge" style="background:rgba(192,57,43,0.12);color:#C0392B;border:1px solid rgba(192,57,43,0.3);">Spicy</span>
+          </div>
+          <p class="text-ash/60 text-sm leading-relaxed mb-4">Fiery salami, roasted peppers, chilli flakes, smoked mozzarella, tomato base.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-flame font-bold text-xl">$16.50</span>
+            <button class="btn-primary text-xs py-2 px-4" aria-label="Add Diavola to cart">Add +</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="pizza-card reveal" data-cat="premium" aria-label="Tartufo Nero pizza">
+        <div class="card-img-wrap">
+          <img src="pizza-images/delicious-pizza-with-pepperoni-mushrooms-and-oli-2026-03-17-17-40-11-utc.jpg" alt="Truffle pizza with mushrooms and olives" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-display text-coal font-bold text-lg">Tartufo Nero</h3>
+            <span class="badge" style="background:rgba(26,10,0,0.08);color:#1A0A00;border:1px solid rgba(26,10,0,0.18);">Premium</span>
+          </div>
+          <p class="text-ash/60 text-sm leading-relaxed mb-4">Black truffle cream, wild mushrooms, fontina, thyme, shaved Parmigiano-Reggiano.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-flame font-bold text-xl">$23.90</span>
+            <button class="btn-primary text-xs py-2 px-4" aria-label="Add Tartufo Nero to cart">Add +</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="pizza-card reveal" data-cat="veg" aria-label="Garden Bianca pizza">
+        <div class="card-img-wrap">
+          <img src="pizza-images/fresh-pizza-with-tomatoes-mushrooms-and-olives-2026-01-09-07-00-10-utc.jpg" alt="Fresh vegetarian pizza with tomatoes mushrooms and olives" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-display text-coal font-bold text-lg">Garden Bianca</h3>
+            <span class="badge" style="background:rgba(34,197,94,0.1);color:#15803D;border:1px solid rgba(34,197,94,0.25);">Veg</span>
+          </div>
+          <p class="text-ash/60 text-sm leading-relaxed mb-4">White garlic sauce, zucchini, cherry tomatoes, artichoke hearts, ricotta, arugula.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-flame font-bold text-xl">$17.50</span>
+            <button class="btn-primary text-xs py-2 px-4" aria-label="Add Garden Bianca to cart">Add +</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="pizza-card reveal" data-cat="premium" aria-label="Prosciutto e Fichi pizza">
+        <div class="card-img-wrap">
+          <img src="pizza-images/delicious-pizza-topped-with-fresh-ingredients-on-w-2026-01-09-06-44-28-utc.jpg" alt="Pizza topped with fresh premium ingredients" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-display text-coal font-bold text-lg">Prosciutto e Fichi</h3>
+            <span class="badge" style="background:rgba(26,10,0,0.08);color:#1A0A00;border:1px solid rgba(26,10,0,0.18);">Premium</span>
+          </div>
+          <p class="text-ash/60 text-sm leading-relaxed mb-4">Prosciutto di Parma, fresh figs, gorgonzola, honey drizzle, walnuts, rocket.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-flame font-bold text-xl">$21.90</span>
+            <button class="btn-primary text-xs py-2 px-4" aria-label="Add Prosciutto e Fichi to cart">Add +</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="pizza-card reveal" data-cat="classic" aria-label="Pepperoni Royale pizza">
+        <div class="card-img-wrap">
+          <img src="pizza-images/delicious-pepperoni-pizza-with-a-slice-pulled-away-2026-04-15-05-02-32-utc.jpg" alt="Pepperoni pizza with a slice being pulled away" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-display text-coal font-bold text-lg">Pepperoni Royale</h3>
+            <span class="badge" style="background:rgba(232,160,32,0.15);color:#B87800;border:1px solid rgba(232,160,32,0.3);">Classic</span>
+          </div>
+          <p class="text-ash/60 text-sm leading-relaxed mb-4">Double-layered pepperoni cups, aged mozzarella, chunky tomato, oregano, olive oil.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-flame font-bold text-xl">$18.50</span>
+            <button class="btn-primary text-xs py-2 px-4" aria-label="Add Pepperoni Royale to cart">Add +</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="pizza-card reveal" data-cat="veg" aria-label="Funghi e Spinaci pizza">
+        <div class="card-img-wrap">
+          <img src="pizza-images/fresh-pizza-variety-on-a-dark-background-2026-03-18-05-42-40-utc.jpg" alt="Fresh pizza variety on dark background" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-display text-coal font-bold text-lg">Funghi e Spinaci</h3>
+            <span class="badge" style="background:rgba(34,197,94,0.1);color:#15803D;border:1px solid rgba(34,197,94,0.25);">Veg</span>
+          </div>
+          <p class="text-ash/60 text-sm leading-relaxed mb-4">Mixed mushrooms, wilted spinach, garlic, cream base, provolone, pine nuts.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-flame font-bold text-xl">$16.90</span>
+            <button class="btn-primary text-xs py-2 px-4" aria-label="Add Funghi e Spinaci to cart">Add +</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="pizza-card reveal" data-cat="premium" aria-label="Nduja & Burrata pizza">
+        <div class="card-img-wrap">
+          <img src="pizza-images/pepperoni-pizza-slices-with-red-peppers-and-herbs-2026-03-24-03-18-03-utc.jpg" alt="Pepperoni pizza slices with red peppers and herbs" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-display text-coal font-bold text-lg">Nduja & Burrata</h3>
+            <span class="badge" style="background:rgba(192,57,43,0.12);color:#C0392B;border:1px solid rgba(192,57,43,0.3);">Hot Pick</span>
+          </div>
+          <p class="text-ash/60 text-sm leading-relaxed mb-4">Spicy Calabrian nduja, creamy burrata, roasted cherry tomatoes, fresh basil oil.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-flame font-bold text-xl">$24.50</span>
+            <button class="btn-primary text-xs py-2 px-4" aria-label="Add Nduja & Burrata to cart">Add +</button>
+          </div>
+        </div>
+      </article>
+
+    </div><!-- /pizza-grid -->
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     ABOUT / STORY
+════════════════════════════════ -->
+<section id="about" class="py-24 px-6 overflow-hidden" style="background:#1A0A00;" aria-label="About us">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+      <!-- Left: Text -->
+      <div class="reveal">
+        <div class="badge mb-5 text-flame" style="background:rgba(255,107,53,0.15); border:1px solid rgba(255,107,53,0.3);">Our Story</div>
+        <h2 class="font-display text-white leading-tight mb-6" style="font-size:clamp(32px,4.5vw,54px);">Born in a Turkish<br/>Kitchen, Loved Everywhere</h2>
+        <p class="text-white/55 mb-5 leading-relaxed" style="font-size:16px;line-height:1.8;">
+          Uslu Pizza started in 2012 when chef Mehmet Uslu brought his grandmother's dough recipe from Izmir to the city.
+          Combined with the finest Italian techniques and locally sourced ingredients, each pizza tells a story of two cultures united by fire.
+        </p>
+        <p class="text-white/55 mb-8 leading-relaxed" style="font-size:16px;line-height:1.8;">
+          Our stone oven reaches 900°F — the same temperature Neapolitan masters have used for centuries.
+          That's how we guarantee that leopard-spotted crust and perfectly melted cheese every single time.
+        </p>
+
+        <!-- Features grid -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex items-start gap-3 p-4 rounded-2xl" style="background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.15);">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(255,107,53,0.2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2" aria-hidden="true"><path d="M12 2c0 0-7 5-7 12a7 7 0 0014 0C19 7 12 2 12 2z"/></svg>
+            </div>
+            <div>
+              <div class="text-white font-bold text-sm mb-1">900°F Stone Oven</div>
+              <div class="text-white/45 text-xs leading-relaxed">Authentic Neapolitan heat</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-4 rounded-2xl" style="background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.15);">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(255,107,53,0.2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <div class="text-white font-bold text-sm mb-1">Premium Imports</div>
+              <div class="text-white/45 text-xs leading-relaxed">Direct from Napoli & Parma</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-4 rounded-2xl" style="background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.15);">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(255,107,53,0.2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div>
+              <div class="text-white font-bold text-sm mb-1">Fresh Daily</div>
+              <div class="text-white/45 text-xs leading-relaxed">Dough made every morning</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-4 rounded-2xl" style="background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.15);">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(255,107,53,0.2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            </div>
+            <div>
+              <div class="text-white font-bold text-sm mb-1">Family First</div>
+              <div class="text-white/45 text-xs leading-relaxed">Every guest is family</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Visual -->
+      <div class="reveal flex flex-col items-center gap-6">
+        <!-- Kitchen video -->
+        <div class="relative mx-auto w-full" style="max-width:380px;">
+          <div class="absolute inset-0 rounded-3xl pointer-events-none" style="background:radial-gradient(circle,rgba(255,107,53,0.25),transparent 70%);animation:pulse-ring 3s ease-in-out infinite;transform:scale(1.06);z-index:0;"></div>
+          <div style="border-radius:24px;overflow:hidden;border:3px solid rgba(255,107,53,0.35);position:relative;z-index:1;">
+            <video autoplay muted loop playsinline preload="metadata"
+                   style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;">
+              <source src="pizza-images/woman-presents-freshly-baked-pizza-in-kitchen-2025-12-17-22-24-02-utc.mov" type="video/mp4" />
+              <source src="pizza-images/woman-presents-freshly-baked-pizza-in-kitchen-2025-12-17-22-24-02-utc.mov" type="video/quicktime" />
+            </video>
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(26,10,0,0.45) 0%,transparent 45%);pointer-events:none;"></div>
+          </div>
+          <!-- Floating badges -->
+          <div class="absolute -top-3 -right-3 px-3 py-1.5 rounded-full text-xs font-bold text-white" style="background:linear-gradient(135deg,#FF6B35,#C0392B);z-index:2;">Made Fresh</div>
+          <div class="absolute -bottom-3 -left-3 px-3 py-1.5 rounded-full text-xs font-bold text-white" style="background:#E8A020;z-index:2;">#1 in City</div>
+        </div>
+
+        <!-- Review cards -->
+        <div class="w-full max-w-sm space-y-3">
+          <div class="flex items-center gap-3 p-3.5 rounded-2xl" style="background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.18);">
+            <div class="w-10 h-10 rounded-full bg-flame flex items-center justify-center text-white font-bold flex-shrink-0">A</div>
+            <div>
+              <div class="text-white font-semibold text-sm">Ayşe K.</div>
+              <div class="text-yellow-400 text-xs">★★★★★</div>
+              <div class="text-white/50 text-xs mt-0.5">"Best pizza I've had outside of Napoli!"</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-3.5 rounded-2xl" style="background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.18);">
+            <div class="w-10 h-10 rounded-full bg-ember flex items-center justify-center text-white font-bold flex-shrink-0">M</div>
+            <div>
+              <div class="text-white font-semibold text-sm">Marcus T.</div>
+              <div class="text-yellow-400 text-xs">★★★★★</div>
+              <div class="text-white/50 text-xs mt-0.5">"That truffle pizza changed my life honestly."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     VIDEO SCRUB
+════════════════════════════════ -->
+<section id="scrub-section" style="height:400vh;position:relative;" aria-label="Scroll experience">
+  <div style="position:sticky;top:0;height:100vh;overflow:hidden;background:#0a0400;">
+
+    <video id="scrub-video" muted playsinline preload="auto"
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;">
+      <source src="pizza-images/pepperoni-pizza-slice-is-lifted-with-cheese-drippi-2025-12-17-19-00-13-utc.mov" type="video/mp4" />
+      <source src="pizza-images/pepperoni-pizza-slice-is-lifted-with-cheese-drippi-2025-12-17-19-00-13-utc.mov" type="video/quicktime" />
+    </video>
+
+    <!-- Dark gradient overlay -->
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(10,4,0,0.7) 0%,rgba(10,4,0,0.1) 50%,rgba(10,4,0,0.4) 100%);pointer-events:none;z-index:2;"></div>
+
+    <!-- Progress bar -->
+    <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.08);z-index:5;">
+      <div id="scrub-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#FF6B35,#C0392B);"></div>
+    </div>
+
+    <!-- Text overlay -->
+    <div id="scrub-text" style="position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding-bottom:80px;pointer-events:none;">
+      <p style="color:rgba(255,255,255,0.45);font-size:12px;font-family:'Karla',sans-serif;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:16px;">Scroll to experience</p>
+      <div style="font-family:'Playfair Display SC',serif;font-size:clamp(32px,5vw,72px);font-weight:700;line-height:1.1;color:#fff;text-shadow:0 2px 40px rgba(0,0,0,0.9);">
+        Made With<br/>
+        <span style="background:linear-gradient(90deg,#FF6B35,#E8A020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Love & Fire</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     GALLERY / VIBE
+════════════════════════════════ -->
+<section id="gallery" class="py-24 px-6" style="background:#FFF8F3;" aria-label="Gallery">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <div class="badge mb-4 text-ember" style="background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.25);">The Experience</div>
+      <h2 class="font-display text-coal" style="font-size:clamp(32px,4.5vw,54px);">Feel the Flame</h2>
+      <div class="flame-divider w-24 mx-auto mt-5"></div>
+    </div>
+
+    <!-- Bento grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 reveal" style="grid-auto-rows:200px;">
+
+      <!-- Large feature cell: cheese drip video -->
+      <div class="col-span-2 row-span-2 rounded-3xl overflow-hidden relative" style="grid-row:span 2;">
+        <video autoplay muted loop playsinline preload="metadata"
+               style="width:100%;height:100%;object-fit:cover;display:block;">
+          <source src="pizza-images/pepperoni-pizza-slice-is-lifted-with-cheese-drippi-2025-12-17-19-00-13-utc.mov" type="video/mp4" />
+          <source src="pizza-images/pepperoni-pizza-slice-is-lifted-with-cheese-drippi-2025-12-17-19-00-13-utc.mov" type="video/quicktime" />
+        </video>
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(26,10,0,0.75) 0%,rgba(26,10,0,0.05) 55%);pointer-events:none;"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-6 z-10">
+          <div class="text-white font-display font-bold text-2xl">Wood-Fired</div>
+          <div class="text-white/70 text-sm mt-1">900°F · 90-second bake</div>
+        </div>
+      </div>
+
+      <!-- Small cell: image -->
+      <div class="rounded-3xl overflow-hidden relative">
+        <img src="pizza-images/delicious-pepperoni-pizza-with-tomatoes-and-basil-2026-03-19-04-02-31-utc.jpg"
+             alt="Pepperoni pizza with tomatoes and basil"
+             style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" />
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(26,10,0,0.6) 0%,transparent 55%);"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-3 z-10">
+          <div class="text-white font-semibold text-xs">San Marzano Base</div>
+        </div>
+      </div>
+
+      <!-- Small cell: stat -->
+      <div class="rounded-3xl flex flex-col items-center justify-center text-center p-4" style="background:linear-gradient(135deg,#C0392B,#FF6B35);">
+        <div class="text-white font-display font-bold text-3xl">24</div>
+        <div class="text-white/80 text-xs font-semibold mt-1 uppercase tracking-widest">Recipes</div>
+      </div>
+
+      <!-- Small cell: image -->
+      <div class="col-span-2 rounded-3xl overflow-hidden relative">
+        <img src="pizza-images/delicious-pepperoni-pizza-with-a-slice-pulled-away-2026-04-15-05-02-32-utc (1).jpg"
+             alt="Close up pizza slice"
+             style="width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;" loading="lazy" />
+        <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(26,10,0,0.65) 0%,transparent 60%);"></div>
+        <div class="absolute left-0 top-0 bottom-0 flex flex-col justify-center p-5 z-10">
+          <div class="text-white font-display font-bold text-xl">Eat Fresh</div>
+          <div class="text-white/65 text-xs mt-1">Made to order, every time</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Offer banner -->
+    <div class="mt-10 reveal rounded-3xl overflow-hidden relative flex flex-col md:flex-row items-center justify-between gap-6 p-8 md:p-10" style="background:linear-gradient(135deg,#1A0A00 0%,#2D1810 100%);">
+      <div style="position:absolute;right:0;top:0;bottom:0;width:300px;background:radial-gradient(ellipse at right,rgba(255,107,53,0.2),transparent 70%);pointer-events:none;"></div>
+      <div>
+        <div class="badge mb-3 text-gold" style="background:rgba(232,160,32,0.15);border:1px solid rgba(232,160,32,0.3);">Limited Offer</div>
+        <h3 class="font-display text-white text-2xl md:text-3xl mb-2">Two Pizzas, One Unforgettable Night</h3>
+        <p class="text-white/55 text-sm">Order any 2 signature pies and get a free arancini starter. Dine-in only.</p>
+      </div>
+      <a href="#contact" class="btn-primary flex-shrink-0" style="font-size:15px;">
+        Book a Table
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     CONTACT / FOOTER
+════════════════════════════════ -->
+<section id="contact" class="py-24 px-6" style="background:#1A0A00;" aria-label="Contact and location">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <div class="badge mb-4 text-flame" style="background:rgba(255,107,53,0.15); border:1px solid rgba(255,107,53,0.3);">Find Us</div>
+      <h2 class="font-display text-white" style="font-size:clamp(32px,4.5vw,54px);">Come Visit</h2>
+      <div class="flame-divider w-24 mx-auto mt-5"></div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 mb-16">
+      <!-- Address -->
+      <div class="reveal p-6 rounded-2xl text-center" style="background:rgba(255,107,53,0.07);border:1px solid rgba(255,107,53,0.15);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style="background:rgba(255,107,53,0.2);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3 class="text-white font-bold text-base mb-2">Address</h3>
+        <p class="text-white/50 text-sm leading-relaxed">42 Flame Street<br/>Karaköy, Istanbul<br/>Turkey 34425</p>
+      </div>
+
+      <!-- Hours -->
+      <div class="reveal p-6 rounded-2xl text-center" style="background:rgba(255,107,53,0.07);border:1px solid rgba(255,107,53,0.15);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style="background:rgba(255,107,53,0.2);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h3 class="text-white font-bold text-base mb-2">Hours</h3>
+        <p class="text-white/50 text-sm leading-relaxed">
+          Mon – Thu: 11:30 – 22:00<br/>
+          Fri – Sat: 11:30 – 23:30<br/>
+          Sunday: 12:00 – 21:00
+        </p>
+      </div>
+
+      <!-- Phone -->
+      <div class="reveal p-6 rounded-2xl text-center" style="background:rgba(255,107,53,0.07);border:1px solid rgba(255,107,53,0.15);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style="background:rgba(255,107,53,0.2);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.1a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .18h3a2 2 0 012 1.72c.13.97.37 1.92.71 2.84a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.06-1.06a2 2 0 012.11-.45c.92.34 1.87.58 2.84.71A2 2 0 0122 16.92z"/></svg>
+        </div>
+        <h3 class="text-white font-bold text-base mb-2">Reservations</h3>
+        <p class="text-white/50 text-sm leading-relaxed">
+          +90 212 555 0142<br/>
+          info@uslupizza.com<br/>
+          <span class="text-flame">Walk-ins welcome</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Reserve form -->
+    <div class="reveal max-w-xl mx-auto p-8 rounded-3xl mb-16" style="background:rgba(255,107,53,0.07);border:1px solid rgba(255,107,53,0.15);">
+      <h3 class="font-display text-white text-2xl mb-6 text-center">Reserve a Table</h3>
+      <form novalidate class="space-y-4" onsubmit="handleReservation(event)">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label for="res-name" class="block text-white/60 text-xs font-semibold uppercase tracking-widest mb-2">Name</label>
+            <input id="res-name" type="text" placeholder="Your name" required autocomplete="name"
+              class="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-flame transition-all duration-200"
+              style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,107,53,0.2);" />
+          </div>
+          <div>
+            <label for="res-email" class="block text-white/60 text-xs font-semibold uppercase tracking-widest mb-2">Email</label>
+            <input id="res-email" type="email" placeholder="your@email.com" required autocomplete="email"
+              class="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-flame transition-all duration-200"
+              style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,107,53,0.2);" />
+          </div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label for="res-date" class="block text-white/60 text-xs font-semibold uppercase tracking-widest mb-2">Date</label>
+            <input id="res-date" type="date" required
+              class="w-full rounded-xl px-4 py-3 text-sm text-white/80 focus:outline-none focus:ring-2 focus:ring-flame transition-all duration-200"
+              style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,107,53,0.2);color-scheme:dark;" />
+          </div>
+          <div>
+            <label for="res-guests" class="block text-white/60 text-xs font-semibold uppercase tracking-widest mb-2">Guests</label>
+            <select id="res-guests" required
+              class="w-full rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-flame transition-all duration-200 cursor-pointer"
+              style="background:rgba(26,10,0,0.8);border:1px solid rgba(255,107,53,0.2);">
+              <option value="" disabled selected>Select guests</option>
+              <option value="1">1 person</option>
+              <option value="2">2 people</option>
+              <option value="3-4">3–4 people</option>
+              <option value="5-6">5–6 people</option>
+              <option value="7+">7+ (large group)</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary w-full justify-center text-base mt-2" style="padding:15px;">
+          Confirm Reservation
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+      <div id="res-success" class="hidden mt-4 text-center py-3 rounded-xl font-semibold text-sm" style="background:rgba(34,197,94,0.15);color:#4ADE80;border:1px solid rgba(34,197,94,0.3);">
+        Table reserved! We'll confirm via email shortly.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     FOOTER
+════════════════════════════════ -->
+<footer style="background:#0E0500;border-top:1px solid rgba(255,107,53,0.1);" role="contentinfo">
+  <div class="max-w-6xl mx-auto px-6 py-12">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+
+      <!-- Brand -->
+      <div class="text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start gap-3 mb-3">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,#FF6B35,#C0392B);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 2 L22 12 Q17 17 12 22 Q2 17 2 12 Z" fill="white" opacity="0.9"/>
+              <circle cx="10" cy="10" r="1.5" fill="#C0392B"/>
+              <circle cx="14" cy="13" r="1.2" fill="#C0392B"/>
+            </svg>
+          </div>
+          <span class="font-display text-white text-xl font-bold">Uslu Pizza</span>
+        </div>
+        <p class="text-white/35 text-xs">Fired with passion since 2012.</p>
+      </div>
+
+      <!-- Nav links -->
+      <nav aria-label="Footer navigation">
+        <ul class="flex flex-wrap justify-center gap-6 text-sm list-none">
+          <li><a href="#menu"    class="text-white/45 hover:text-flame transition-colors duration-200 cursor-pointer">Menu</a></li>
+          <li><a href="#about"   class="text-white/45 hover:text-flame transition-colors duration-200 cursor-pointer">About</a></li>
+          <li><a href="#gallery" class="text-white/45 hover:text-flame transition-colors duration-200 cursor-pointer">Gallery</a></li>
+          <li><a href="#contact" class="text-white/45 hover:text-flame transition-colors duration-200 cursor-pointer">Contact</a></li>
+        </ul>
+      </nav>
+
+      <!-- Social -->
+      <div class="flex items-center gap-3" aria-label="Social media links">
+        <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-flame transition-colors duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-flame" style="background:rgba(255,255,255,0.06);" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-flame transition-colors duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-flame" style="background:rgba(255,255,255,0.06);" aria-label="TikTok">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.5a8.16 8.16 0 004.78 1.52V7.58a4.85 4.85 0 01-1.01-.89z"/></svg>
+        </a>
+        <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-flame transition-colors duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-flame" style="background:rgba(255,255,255,0.06);" aria-label="Facebook">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="flame-divider mt-10 mb-6 opacity-30"></div>
+    <p class="text-center text-white/25 text-xs">&copy; 2026 Uslu Pizza. All rights reserved. · Made with passion in Istanbul.</p>
+  </div>
+</footer>
+
+
+<!-- Cart toast -->
+<div id="cart-toast" role="status" aria-live="polite"></div>
+
+<!-- ════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════ -->
+<script>
+  // ── Navbar scroll effect ──
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // ── Mobile hamburger ──
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const hamIcon    = document.getElementById('ham-icon');
+  const closeIcon  = document.getElementById('close-icon');
+
+  hamburger.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    hamburger.setAttribute('aria-expanded', isOpen);
+    hamIcon.classList.toggle('hidden', isOpen);
+    closeIcon.classList.toggle('hidden', !isOpen);
+  });
+
+  // Close mobile menu on link click
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', false);
+      hamIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    });
+  });
+
+  // ── Smooth scroll for ALL anchor links ──
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      const id = link.getAttribute('href').slice(1);
+      if (!id) return;
+      const target = document.getElementById(id);
+      if (!target) return;
+      e.preventDefault();
+      const top = target.getBoundingClientRect().top + window.pageYOffset - 80;
+      window.scrollTo({ top, behavior: 'smooth' });
+      mobileMenu.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', false);
+      hamIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    });
+  });
+
+  // ── Cart toast ──
+  let toastTimer;
+  const toast = document.getElementById('cart-toast');
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    toast.textContent = msg;
+    toast.classList.add('show');
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  document.querySelectorAll('#pizza-grid button').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const name = btn.closest('article').querySelector('h3').textContent;
+      showToast(name + ' added to your order!');
+    });
+  });
+
+  // ── Scroll reveal ──
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // ── Menu category filter ──
+  const tabs = document.querySelectorAll('.menu-tab');
+  const cards = document.querySelectorAll('#pizza-grid article');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const cat = tab.dataset.cat;
+
+      // Update tab styles
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+        t.style.background = 'rgba(26,10,0,0.06)';
+        t.style.color = '#2D1810';
+        t.style.border = '1px solid rgba(26,10,0,0.12)';
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      tab.style.background = 'linear-gradient(135deg,#FF6B35,#C0392B)';
+      tab.style.color = '#fff';
+      tab.style.border = 'none';
+
+      // Filter cards
+      cards.forEach(card => {
+        const show = cat === 'all' || card.dataset.cat === cat;
+        card.style.display = show ? 'block' : 'none';
+        if (show) setTimeout(() => card.classList.add('visible'), 50);
+      });
+    });
+  });
+
+  // ── Video scrub ──
+  const scrubVideo   = document.getElementById('scrub-video');
+  const scrubBar     = document.getElementById('scrub-bar');
+  const scrubText    = document.getElementById('scrub-text');
+  const scrubSection = document.getElementById('scrub-section');
+
+  let scrubRAF = null;
+  function updateScrub() {
+    const sectionTop    = scrubSection.offsetTop;
+    const sectionHeight = scrubSection.offsetHeight - window.innerHeight;
+    const scrolled      = window.pageYOffset - sectionTop;
+    const progress      = Math.max(0, Math.min(1, scrolled / sectionHeight));
+
+    if (scrubVideo.readyState >= 2 && scrubVideo.duration) {
+      scrubVideo.currentTime = progress * scrubVideo.duration;
+    }
+    scrubBar.style.width = (progress * 100).toFixed(2) + '%';
+    scrubText.style.opacity = progress < 0.06 ? 1 : Math.max(0, 1 - (progress - 0.06) / 0.12);
+  }
+
+  window.addEventListener('scroll', () => {
+    if (scrubRAF) cancelAnimationFrame(scrubRAF);
+    scrubRAF = requestAnimationFrame(updateScrub);
+  }, { passive: true });
+
+  scrubVideo.addEventListener('loadedmetadata', updateScrub);
+
+  // ── Reservation form ──
+  function handleReservation(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Reserving…';
+
+    setTimeout(() => {
+      document.getElementById('res-success').classList.remove('hidden');
+      e.target.reset();
+      btn.disabled = false;
+      btn.innerHTML = 'Confirm Reservation <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+      setTimeout(() => document.getElementById('res-success').classList.add('hidden'), 5000);
+    }, 1200);
+  }
+</script>
+
+</body>
+</html>
